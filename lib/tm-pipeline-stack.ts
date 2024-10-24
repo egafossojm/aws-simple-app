@@ -17,15 +17,21 @@ export class TmPipelineStack extends cdk.Stack {
   // const removalPolicy = getRemovalPolicy(removalPolicyString);
   const removalPolicy = getRemovalPolicy('DESTROY');
 
-  const repository = codecommit.Repository.fromRepositoryName(
-    this, 'Infrastructure', 'infra');
+  // const repository = codecommit.Repository.fromRepositoryName(
+  //   this, 'Infrastructure', 'infra');
 
-  const additionalRepository = codecommit.Repository.fromRepositoryName(
-    this, 'Application', 'test');
+  // const additionalRepository = codecommit.Repository.fromRepositoryName(
+  //   this, 'Application', 'test');
 
-  // const branchNameParam = ssm.StringParameter.valueForStringParameter(
-  //   this, '/pipeline/parameters/branchName');
-  const branchNameParam = 'main';
+  // // const branchNameParam = ssm.StringParameter.valueForStringParameter(
+  // //   this, '/pipeline/parameters/branchName');
+  // const branchNameParam = 'main';
+
+  const repoOwner = 'egafossojm'; 
+  const infraRepoName = 'aws-simple-app';
+  const appRepoName  = 'aws-simple-app-code'
+  // const branchName = 'main'; // Replace with the branch you want to track
+
 
   cdk.Aspects.of(this).add(new ApplyRemovalPolicyAspect(removalPolicy));
 
@@ -33,14 +39,17 @@ export class TmPipelineStack extends cdk.Stack {
     crossAccountKeys: true,
     pipelineName: 'TmPipelineStack',
     synth: new pipelines.CodeBuildStep('Synth', {
-      input: pipelines.CodePipelineSource.codeCommit(repository, 'test'),
-
+      input: pipelines.CodePipelineSource.gitHub(`${repoOwner}/${infraRepoName}`, 'main', {
+        authentication: cdk.SecretValue.secretsManager('avatar-github-token'),
+      }), 
       /* Additional input from another repository; 
       the ./build directory is where the additional repository
       will be stored during the pipeline process.
       */
       additionalInputs: {
-        'build': pipelines.CodePipelineSource.codeCommit(additionalRepository, 'main'),
+        'build': pipelines.CodePipelineSource.gitHub(`${repoOwner}/${appRepoName}`, 'main', {
+          authentication: cdk.SecretValue.secretsManager('avatar-github-token'),
+        }),
       },
       // Commands to run in the synth step
       installCommands: ['npm install', 'npm ci', 'npm install -g aws-cdk'],

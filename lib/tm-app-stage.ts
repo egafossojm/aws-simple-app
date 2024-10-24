@@ -77,7 +77,7 @@ export class TmPipelineAppStage extends cdk.Stage {
       // solrSecurityGroup: solr.securityGroup,
       cpu: 512,
       memoryLimitMiB: 1024,
-      desiredCount: 6,
+      desiredCount: 1,
       /*
       hostedZoneIdParameterName: 'hostedZoneId',
       customHttpHeaderParameterName: 'customHttpHeaderValue',
