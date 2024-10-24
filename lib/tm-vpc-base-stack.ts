@@ -11,7 +11,7 @@ interface VpcBaseStackProps extends cdk.StackProps {
 
 export class TmVpcBaseStack extends cdk.Stack {
   public readonly vpc: IVpc;
-  public readonly hostedZone: route53.IHostedZone;
+  //public readonly hostedZone: route53.IHostedZone;
   constructor(scope: Construct, id: string, props?: VpcBaseStackProps) {
     super(scope, id, props);
 
@@ -22,10 +22,10 @@ export class TmVpcBaseStack extends cdk.Stack {
 
     });
 
-    this.hostedZone = new route53.PrivateHostedZone(this, 'PrivateHostedZone', {
-      zoneName: props?.hostedZoneName || 'example.internal',
-      vpc: this.vpc,
-    });
+    // this.hostedZone = new route53.PrivateHostedZone(this, 'PrivateHostedZone', {
+    //   zoneName: props?.hostedZoneName || 'example.internal',
+    //   vpc: this.vpc,
+    // });
 
   }
 

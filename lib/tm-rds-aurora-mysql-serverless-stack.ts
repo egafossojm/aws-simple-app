@@ -41,17 +41,17 @@ export class TmRdsAuroraMysqlServerlessStack extends cdk.Stack {
     });
 
     new ssm.StringParameter(this, 'clusterRdsArn', {
-      parameterName: '/RDS/Cluster/ARN',
+      parameterName: '/avatar/rds/clusterArn',
       stringValue: cluster.clusterArn,
     });
 
     new ssm.StringParameter(this, 'clusterRdsWrite', {
-      parameterName: '/RDS/Endpoint/Write',
+      parameterName: '/avatar/rds/endpoint/write',
       stringValue: cluster.clusterEndpoint.hostname,
     });
 
     new ssm.StringParameter(this, 'clusterRdsRead', {
-      parameterName: '/RDS/Endpoint/Read',
+      parameterName: '/avatar/rds/endpoint/read',
       stringValue: cluster.clusterReadEndpoint.hostname,
     });
 
