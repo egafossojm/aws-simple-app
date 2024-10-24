@@ -48,7 +48,7 @@ export class TmPipelineStack extends cdk.Stack {
       */
       additionalInputs: {
         'build': pipelines.CodePipelineSource.gitHub(`${repoOwner}/${appRepoName}`, 'main', {
-          authentication: cdk.SecretValue.secretsManager('avatar-github-token'),
+          authentication: cdk.SecretValue.secretsManager('avatar/github-token'),
         }),
       },
       // Commands to run in the synth step
