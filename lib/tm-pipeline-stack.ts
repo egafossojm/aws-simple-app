@@ -40,7 +40,7 @@ export class TmPipelineStack extends cdk.Stack {
     pipelineName: 'TmPipelineStack',
     synth: new pipelines.CodeBuildStep('Synth', {
       input: pipelines.CodePipelineSource.gitHub(`${repoOwner}/${infraRepoName}`, 'main', {
-        authentication: cdk.SecretValue.secretsManager('avatar/github/token'),
+        authentication: cdk.SecretValue.secretsManager('avatar/github-token'),
       }),
       /* Additional input from another repository; 
       the ./build directory is where the additional repository
@@ -48,7 +48,7 @@ export class TmPipelineStack extends cdk.Stack {
       */
       additionalInputs: {
         'build': pipelines.CodePipelineSource.gitHub(`${repoOwner}/${appRepoName}`, 'main', {
-          authentication: cdk.SecretValue.secretsManager('avatar/github/token'),
+          authentication: cdk.SecretValue.secretsManager('avatar/github-token'),
         }),
       },
       // Commands to run in the synth step
