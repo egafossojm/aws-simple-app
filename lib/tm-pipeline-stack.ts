@@ -8,20 +8,21 @@ import * as kms from 'aws-cdk-lib/aws-kms';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { ApplyRemovalPolicyAspect, getRemovalPolicy } from './utils/removal-policy-aspect';
 
-
+interface TmPipelineStackProps extends cdk.StackProps {
+  readonly repoOwner: string;
+  readonly infraRepoName: string;
+  readonly appRepoName: string;
+  readonly infraBranchName: string;
+  readonly appBranchName: string;
+  
+}
 export class TmPipelineStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: TmPipelineStackProps) {
     super(scope, id, props);
 
   // const removalPolicyString = this.node.tryGetContext('removalPolicy') || 'RETAIN';
   // const removalPolicy = getRemovalPolicy(removalPolicyString);
   const removalPolicy = getRemovalPolicy('DESTROY');
-
-  const repoOwner = 'egafossojm'; 
-  const infraRepoName = 'aws-simple-app';
-  const appRepoName  = 'aws-simple-app-code'
-  // const branchName = 'main'; // Replace with the branch you want to track
-
 
   cdk.Aspects.of(this).add(new ApplyRemovalPolicyAspect(removalPolicy));
 
@@ -29,7 +30,7 @@ export class TmPipelineStack extends cdk.Stack {
     crossAccountKeys: true,
     pipelineName: 'TmPipelineStack',
     synth: new pipelines.CodeBuildStep('Synth', {
-      input: pipelines.CodePipelineSource.connection(`${repoOwner}/${infraRepoName}`, 'main', {
+      input: pipelines.CodePipelineSource.connection(`${props.repoOwner }/${props.infraRepoName}`, props.infraBranchName, {
         connectionArn: 'arn:aws:codeconnections:ca-central-1:445654923997:connection/57f0b3f9-7d4f-420f-952d-7cf1846d045a',
       }),
       /* Additional input from another repository; 
@@ -37,7 +38,7 @@ export class TmPipelineStack extends cdk.Stack {
       will be stored during the pipeline process.
       */
       additionalInputs: {
-        'build': pipelines.CodePipelineSource.connection(`${repoOwner}/${appRepoName}`, 'main', {
+        'build': pipelines.CodePipelineSource.connection(`${props.repoOwner}/${props.appRepoName}`, props.appBranchName, {
           connectionArn: 'arn:aws:codeconnections:ca-central-1:445654923997:connection/57f0b3f9-7d4f-420f-952d-7cf1846d045a',
         }),
       },

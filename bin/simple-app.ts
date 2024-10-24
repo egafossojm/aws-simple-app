@@ -14,6 +14,11 @@ const env = {
 
 const pipelineStack = new TmPipelineStack(app, 'TmPipelineStack', {
   env: env,
+  repoOwner : 'egafossojm',
+  infraRepoName : 'aws-simple-app',
+  appRepoName  : 'aws-simple-app-code',
+  infraBranchName : 'main',
+  appBranchName : 'main'
 });
 
 Aspects.of(app).add(new AwsSolutionsChecks({verbose: true}));
