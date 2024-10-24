@@ -32,7 +32,7 @@ export class TmPipelineAppStage extends cdk.Stage {
     const vpc = new TmVpcBaseStack(this, `TmVpc${regionName}Stack`, {
       env: env,
       range: '10.3.0.0/16',
-      hostedZoneName: 'chc-site-web.internal',
+      hostedZoneName: 'avatar-site-web.internal',
     });
     
     const bastion = new TmBastionStack(this, `TmBastion${regionName}Stack`, {
@@ -69,7 +69,7 @@ export class TmPipelineAppStage extends cdk.Stage {
       buildContextPath: path.join(__dirname, '../build/'),
       buildDockerfile: 'docker/apache-php-8.2/Dockerfile',
       //buildDockerfile: 'docker/Dockerfile',
-      applicationName: 'tm',
+      applicationName: 'avatar',
       customHttpHeaderParameterName: '/avatar/cloudfrontStack/parameters/customHttpHeader',
       rdsClusterSecurityGroup: rds.securityGroup,
       // redisClusterSecurityGroup: redis.securityGroup,
@@ -83,7 +83,12 @@ export class TmPipelineAppStage extends cdk.Stage {
       domainParameterName: 'domainName',
       subjectAlternativeNamesParameterName: 'subjectAlternativeNames',
       */
-      // secretsFromSsmParameterStore: [
+     // for secrets like `/applications/${applicationName}/secrets/${secret}`,
+       secretsFromSsmParameterStore: [
+        "WP_DATABASE_HOST",
+        "WP_DATABASE_NAME",
+        "WP_DATABASE_USER_NAME",
+        "WP_DATABASE_USER_PASSWORD",
       //   "TOU_BASE_DOMAIN",
       //   "TOU_DOMAINS_LIST",
       //   "TOU_DATABASE_NAME",
@@ -107,7 +112,7 @@ export class TmPipelineAppStage extends cdk.Stage {
       //   "TOU_TM_S3ASSETS_BUCKET_NAME",
       //   "TOU_TM_S3ASSETS_DOMAIN",
       //   "TOU_SOLR_SERVER_PORT",
-      // ],
+       ],
       // additionalSecretsFromParameterStore: { 
       //   "TOU_DATABASE_WRITER_HOSTNAME": "/RDS/Endpoint/Write",
       //   "TOU_REDIS_HOSTNAME": "/Redis/Endpoint/Primary",

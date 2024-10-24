@@ -39,16 +39,22 @@ export class TmPipelineStack extends cdk.Stack {
     crossAccountKeys: true,
     pipelineName: 'TmPipelineStack',
     synth: new pipelines.CodeBuildStep('Synth', {
-      input: pipelines.CodePipelineSource.gitHub(`${repoOwner}/${infraRepoName}`, 'main', {
-        authentication: cdk.SecretValue.secretsManager('avatarGithubToken'),
+      // input: pipelines.CodePipelineSource.gitHub(`${repoOwner}/${infraRepoName}`, 'main', {
+      //   authentication: cdk.SecretValue.secretsManager('avatarGithubToken'),
+      // }),
+      input: pipelines.CodePipelineSource.connection(`${repoOwner}/${infraRepoName}`, 'main', {
+        connectionArn: 'arn:aws:codeconnections:ca-central-1:445654923997:connection/57f0b3f9-7d4f-420f-952d-7cf1846d045a', // Replace with your CodeStar connection ARN
       }),
       /* Additional input from another repository; 
       the ./build directory is where the additional repository
       will be stored during the pipeline process.
       */
       additionalInputs: {
-        'build': pipelines.CodePipelineSource.gitHub(`${repoOwner}/${appRepoName}`, 'main', {
-          authentication: cdk.SecretValue.secretsManager('avatarGithubToken'),
+        // 'build': pipelines.CodePipelineSource.gitHub(`${repoOwner}/${appRepoName}`, 'main', {
+        //   authentication: cdk.SecretValue.secretsManager('avatarGithubToken'),
+        // }),
+        'build': pipelines.CodePipelineSource.connection(`${repoOwner}/${appRepoName}`, 'main', {
+          connectionArn: 'arn:aws:codeconnections:ca-central-1:445654923997:connection/57f0b3f9-7d4f-420f-952d-7cf1846d045a', // Replace with your CodeStar connection ARN
         }),
       },
       // Commands to run in the synth step
