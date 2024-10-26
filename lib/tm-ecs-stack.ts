@@ -45,9 +45,21 @@ class CustomTmApplicationLoadBalancedFargateService extends TmApplicationLoadBal
         containerPort: 8080, // Port that NGINX listens on
         protocol: ecs.Protocol.TCP,
       });
-    }
+      props.efsVolumes?.forEach((volume) => {
+      secondaryContainer.addMountPoints({
+        containerPath: volume.path,
+        sourceVolume: volume.name,
+        readOnly: true, // Set to read-only for NGINX
+      });
+    });
+
+      secondaryContainer.addContainerDependencies({
+        container: this.taskDefinition.defaultContainer!,
+        condition: ecs.ContainerDependencyCondition.START, // Wait until PHP container starts
+      });
 
   }
+}
 }
 
 export interface TmEcsStackProps extends cdk.StackProps {
