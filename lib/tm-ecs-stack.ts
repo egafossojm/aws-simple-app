@@ -41,10 +41,10 @@ class CustomTmApplicationLoadBalancedFargateService extends TmApplicationLoadBal
         image: ecs.ContainerImage.fromDockerImageAsset(secondaryDockerImageAsset),
         logging: ecs.LogDriver.awsLogs({ streamPrefix: 'secondaryImage' }),
       });
-      // secondaryContainer.addPortMappings({
-      //   containerPort: 8080, // Port that NGINX listens on
-      //   protocol: ecs.Protocol.TCP,
-      // });
+      secondaryContainer.addPortMappings({
+        containerPort: 80, // Port that NGINX listens on
+        protocol: ecs.Protocol.TCP,
+      });
       props.efsVolumes?.forEach((volume) => {
       secondaryContainer.addMountPoints({
         containerPath: volume.path,
