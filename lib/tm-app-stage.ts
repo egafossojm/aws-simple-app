@@ -65,7 +65,7 @@ export class TmPipelineAppStage extends cdk.Stage {
       env: env,
       vpc: vpc.vpc,
       listenToHttp: true,
-      containerPort: 8080,
+      containerPort: 9000,
       crossRegionReferences: true,
       buildContextPath: path.join(__dirname, '../build/docker/php/'),
       // buildDockerfile: 'docker/apache-php-8.2/Dockerfile',
