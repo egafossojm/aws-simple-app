@@ -65,13 +65,13 @@ export class TmPipelineAppStage extends cdk.Stage {
       env: env,
       vpc: vpc.vpc,
       listenToHttp: true,
-      containerPort: 9000,
-      
+      containerPort: 80,
+
       crossRegionReferences: true,
-      buildContextPath: path.join(__dirname, '../build/docker/php/'),
+      buildContextPath: path.join(__dirname, '../build/docker/nginx/'),
       // buildDockerfile: 'docker/apache-php-8.2/Dockerfile',
       buildDockerfile: 'Dockerfile',
-      secondBuildContextPath: path.join(__dirname, '../build/docker/nginx/'),
+      secondBuildContextPath: path.join(__dirname, '../build/docker/php/'),
       secondBuildDockerfile: 'Dockerfile',
       applicationName: 'avatar',
       customHttpHeaderParameterName: '/avatar/cloudfrontStack/parameters/customHttpHeader',

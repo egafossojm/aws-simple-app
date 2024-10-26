@@ -53,8 +53,8 @@ class CustomTmApplicationLoadBalancedFargateService extends TmApplicationLoadBal
       });
     });
 
-      secondaryContainer.addContainerDependencies({
-        container: this.taskDefinition.defaultContainer!,
+    this.taskDefinition.defaultContainer!.addContainerDependencies({
+        container: secondaryContainer,
         condition: ecs.ContainerDependencyCondition.START, // Wait until PHP container starts
       });
 
