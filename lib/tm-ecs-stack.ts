@@ -42,7 +42,7 @@ class CustomTmApplicationLoadBalancedFargateService extends TmApplicationLoadBal
         logging: ecs.LogDriver.awsLogs({ streamPrefix: 'secondaryImage' }),
       });
       secondaryContainer.addPortMappings({
-        containerPort: 80, // Port that NGINX listens on
+        containerPort: 9000, // Port that PHP-FPM listens on
         protocol: ecs.Protocol.TCP,
       });
       props.efsVolumes?.forEach((volume) => {
