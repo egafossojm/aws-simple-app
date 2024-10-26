@@ -65,7 +65,7 @@ export class TmPipelineAppStage extends cdk.Stage {
       env: env,
       vpc: vpc.vpc,
       listenToHttp: true,
-      containerPort: 80,
+      containerPort: 8080,
 
       crossRegionReferences: true,
       buildContextPath: path.join(__dirname, '../build/docker/nginx/'),
