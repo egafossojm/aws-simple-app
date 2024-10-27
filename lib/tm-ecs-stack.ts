@@ -42,7 +42,7 @@ class CustomTmApplicationLoadBalancedFargateService extends TmApplicationLoadBal
         logging: ecs.LogDriver.awsLogs({ streamPrefix: 'secondaryImage' }),
       });
       secondaryContainer.addPortMappings({
-        containerPort: 9000, // Port that PHP-FPM listens on
+        containerPort: 9000, // Port that nginx listens on
         protocol: ecs.Protocol.TCP,
       });
       props.efsVolumes?.forEach((volume) => {
@@ -177,6 +177,11 @@ export class TmEcsStack extends cdk.Stack {
     /** Service Pattern */
     const tmPatterns = new CustomTmApplicationLoadBalancedFargateService(this, 'servicePattern', patternsProps);
     tmPatterns.loadBalancer.addSecurityGroup(lbSecurityGroup);
+    tmPatterns.targetGroup.configureHealthCheck({
+      path: '/',
+      port: '8080',
+      healthyHttpCodes: '200',
+    })
 
     tmPatterns.taskDefinition.addToExecutionRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
