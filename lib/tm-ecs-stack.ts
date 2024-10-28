@@ -26,10 +26,10 @@ class CustomTmApplicationLoadBalancedFargateService extends TmApplicationLoadBal
     // Optionally create a secondary Docker image asset
     const secondaryDockerImageAsset = props.secondBuildContextPath && props.secondBuildDockerfile
       ? new ecr_assets.DockerImageAsset(scope, 'SecondaryApplicationImage', {
-          directory: props.secondBuildContextPath,
-          file: props.secondBuildDockerfile,
-          followSymlinks: cdk.SymlinkFollowMode.ALWAYS,
-        })
+        directory: props.secondBuildContextPath,
+        file: props.secondBuildDockerfile,
+        followSymlinks: cdk.SymlinkFollowMode.ALWAYS,
+      })
       : undefined;
 
     // Initialize the original class with custom props
@@ -46,20 +46,20 @@ class CustomTmApplicationLoadBalancedFargateService extends TmApplicationLoadBal
         protocol: ecs.Protocol.TCP,
       });
       props.efsVolumes?.forEach((volume) => {
-      secondaryContainer.addMountPoints({
-        containerPath: volume.path,
-        sourceVolume: volume.name,
-        readOnly: true, // Set to read-only for NGINX
+        secondaryContainer.addMountPoints({
+          containerPath: volume.path,
+          sourceVolume: volume.name,
+          readOnly: true, // Set to read-only for NGINX
+        });
       });
-    });
 
-    this.taskDefinition.defaultContainer!.addContainerDependencies({
+      this.taskDefinition.defaultContainer!.addContainerDependencies({
         container: secondaryContainer,
-        condition: ecs.ContainerDependencyCondition.START, // Wait until PHP container starts
+        condition: ecs.ContainerDependencyCondition.START, 
       });
 
+    }
   }
-}
 }
 
 export interface TmEcsStackProps extends cdk.StackProps {
@@ -79,8 +79,8 @@ export interface TmEcsStackProps extends cdk.StackProps {
   readonly applicationName: string;
   readonly buildContextPath: string;
   readonly buildDockerfile: string;
-  readonly secondBuildContextPath: string;
-  readonly secondBuildDockerfile: string;
+  readonly secondBuildContextPath?: string;
+  readonly secondBuildDockerfile?: string;
   readonly scheduledTaskScheduleExpression?: cdk.aws_events.Schedule;
   readonly scheduledTasksCommand?: string;
   readonly rdsClusterSecurityGroup: ec2.ISecurityGroup;
@@ -164,12 +164,12 @@ export class TmEcsStack extends cdk.Stack {
       secrets: environment_secrets,
       buildContextPath: props.buildContextPath,
       buildDockerfile: props.buildDockerfile,
-      secondBuildContextPath: props.secondBuildContextPath,
-      secondBuildDockerfile: props.secondBuildDockerfile,
+      // secondBuildContextPath: props.secondBuildContextPath,
+      // secondBuildDockerfile: props.secondBuildDockerfile,
       scheduledTaskScheduleExpression: props.scheduledTaskScheduleExpression,
       //schedule: cdk.aws_events.Schedule.rate(cdk.Duration.minutes(1)),
       scheduledTasksCommand: props.scheduledTasksCommand,
-      efsVolumes:  [
+      efsVolumes: [
         { name: 'assets', path: '/var/www/public/typo3temp/assets' },
       ],
     }
@@ -177,11 +177,11 @@ export class TmEcsStack extends cdk.Stack {
     /** Service Pattern */
     const tmPatterns = new CustomTmApplicationLoadBalancedFargateService(this, 'servicePattern', patternsProps);
     tmPatterns.loadBalancer.addSecurityGroup(lbSecurityGroup);
-    tmPatterns.targetGroup.configureHealthCheck({
-      path: '/',
-      port: '8080',
-      healthyHttpCodes: '200',
-    })
+    // tmPatterns.targetGroup.configureHealthCheck({
+    //   path: '/',
+    //   port: '8080',
+    //   healthyHttpCodes: '200',
+    // })
 
     tmPatterns.taskDefinition.addToExecutionRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
