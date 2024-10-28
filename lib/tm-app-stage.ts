@@ -69,7 +69,7 @@ export class TmPipelineAppStage extends cdk.Stage {
 
       crossRegionReferences: true,
       buildContextPath: path.join(__dirname, '../build/'),
-      buildDockerfile: 'docker/apache-php-8.2/Dockerfile',
+      buildDockerfile: 'docker.bk/apache-php-8.2/Dockerfile',
       //buildContextPath: path.join(__dirname, '../build/docker/nginx/'),
       //buildDockerfile: 'Dockerfile',
       //secondBuildContextPath: path.join(__dirname, '../build/docker/php/'),
