@@ -71,18 +71,14 @@ export class TmPipelineStack extends cdk.Stack {
       // //   ANOTHER_VARIABLE: process.env.ANOTHER_VARIABLE || 'default-value',
       // },
       buildEnvironment: {
-        // The user of a Docker image asset in the pipeline requires turning on
-        // 'dockerEnabledForSelfMutation'.
-        // buildImage: codebuild.LinuxBuildImage.fromAsset(this, 'Image', {
-        //   directory: './docker-image',
-        // }),
         environmentVariables: {
           VERSION: {
             type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
             value: 'bookworm',
           },
-        }
-      }
+        },
+        privileged: true, // Enable Docker for CodeBuild
+      },
     }),
   });
 
