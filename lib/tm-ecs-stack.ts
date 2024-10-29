@@ -17,11 +17,14 @@ interface CustomTmApplicationLoadBalancedFargateServiceProps extends TmApplicati
 class CustomTmApplicationLoadBalancedFargateService extends TmApplicationLoadBalancedFargateService {
   constructor(scope: Construct, id: string, props: CustomTmApplicationLoadBalancedFargateServiceProps) {
     // Create the primary Docker image asset
-    // const primaryDockerImageAsset = new DockerImageAsset(scope, 'PrimaryApplicationImage', {
-    //   directory: props.buildContextPath!,
-    //   file: props.buildDockerfile!,
-    //   followSymlinks: cdk.SymlinkFollowMode.ALWAYS,
-    // });
+    const customDockerImageAsset = new ecr_assets.DockerImageAsset(scope, 'CustomApplicationImage', {
+      directory: props.buildContextPath,
+      file: props.buildDockerfile,
+      followSymlinks: cdk.SymlinkFollowMode.ALWAYS,
+      buildArgs: {
+        DIR: 'Directory'
+      },
+    });
 
     // Optionally create a secondary Docker image asset
     const secondaryDockerImageAsset = props.secondBuildContextPath && props.secondBuildDockerfile
@@ -29,12 +32,24 @@ class CustomTmApplicationLoadBalancedFargateService extends TmApplicationLoadBal
         directory: props.secondBuildContextPath,
         file: props.secondBuildDockerfile,
         followSymlinks: cdk.SymlinkFollowMode.ALWAYS,
+        buildArgs:{
+          DIR: 'Directory'
+        }
       })
       : undefined;
 
-    // Initialize the original class with custom props
-    super(scope, id, props);
+          // Update task image options to use the custom image
+    const customProps: TmApplicationLoadBalancedFargateServiceProps = {
+      ...props,
+      taskImageOptions: {
+        ...props.taskImageOptions,
+        image: ecs.ContainerImage.fromDockerImageAsset(customDockerImageAsset),
+      },
+    };
 
+    // Pass updated props to the parent class
+    super(scope, id, customProps);
+  
     // Add secondary container if the image was created
     if (secondaryDockerImageAsset) {
       const secondaryContainer = this.taskDefinition.addContainer('SecondaryContainer', {
@@ -97,6 +112,7 @@ export class TmEcsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: TmEcsStackProps) {
 
     super(scope, id, props);
+    
 
     // Get cloudFront prefixlist
     const cloudFrontPrefixListId = new AwsManagedPrefixList(this, 'CloudfrontOriginPrefixList', {
@@ -139,7 +155,7 @@ export class TmEcsStack extends cdk.Stack {
     //   containerPort: props.containerPort,
     //   //customHttpHeaderValue: props.customHttpHeaderValue,
     //   customHttpHeaderValue: customHttpHeaderValue,
-    //   buildContextPath: props.buildContextPath ?? './',
+    //   buildContextPath: props.buil tmPatterns.dContextPath ?? './',
     //   buildDockerfile: props.buildDockerfile ?? 'Dockerfile',
     //   certificate: new acm.Certificate(this, 'Certificate', {
     //     domainName: domainName,
@@ -157,7 +173,7 @@ export class TmEcsStack extends cdk.Stack {
       maxTaskCount: props.maxTaskCount,
       containerPort: props.containerPort,
       // Force HTTP instead of HTTPS
-      //listenerPort: 80,
+      listenerPort: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
       targetProtocol: elbv2.ApplicationProtocol.HTTP,
       customHttpHeaderValue: ssm.StringParameter.valueForStringParameter(this, props.customHttpHeaderParameterName),
@@ -177,6 +193,7 @@ export class TmEcsStack extends cdk.Stack {
     /** Service Pattern */
     const tmPatterns = new CustomTmApplicationLoadBalancedFargateService(this, 'servicePattern', patternsProps);
     tmPatterns.loadBalancer.addSecurityGroup(lbSecurityGroup);
+
     // tmPatterns.targetGroup.configureHealthCheck({
     //   path: '/',
     //   port: '8080',
