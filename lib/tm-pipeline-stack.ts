@@ -53,7 +53,6 @@ export class TmPipelineStack extends cdk.Stack {
         'find . -iname cdk.out',
         'ls -al',
         'pwd',
-        //'export VERSION=bookworm'
         //'rm -rf cdk.out/asset.*',
       ],
       primaryOutputDirectory: './cdk.out',
@@ -66,20 +65,17 @@ export class TmPipelineStack extends cdk.Stack {
           resources: ['*'],
         }),
       ],
-      // env: {
-      //   VERSION: 'bookworm',
-      // //   ANOTHER_VARIABLE: process.env.ANOTHER_VARIABLE || 'default-value',
-      // },
+    }),
+    assetPublishingCodeBuildDefaults: {
       buildEnvironment: {
         environmentVariables: {
           VERSION: {
-            type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
-            value: 'bookworm',
+            value: 'Directory'
           },
         },
-        privileged: true, // Enable Docker for CodeBuild
-      },
-    }),
+      }
+
+    }
   });
 
   pipeline.addStage(new TmPipelineAppStage(this, 'AppStage', {
