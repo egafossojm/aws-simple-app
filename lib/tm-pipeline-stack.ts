@@ -74,7 +74,33 @@ export class TmPipelineStack extends cdk.Stack {
           },
         },
       }
-
+    },
+    codeBuildDefaults: {
+      buildEnvironment: {
+        environmentVariables: {
+          VERSION: {
+            value: 'Directory'
+          },
+        },
+      }
+    },
+    synthCodeBuildDefaults: {
+      buildEnvironment: {
+        environmentVariables: {
+          VERSION: {
+            value: 'Directory'
+          },
+        },
+      }
+    },
+    selfMutationCodeBuildDefaults: {
+      buildEnvironment: {
+        environmentVariables: {
+          VERSION: {
+            value: 'Directory'
+          },
+        },
+      }
     }
   });
 
