@@ -64,6 +64,10 @@ export class TmPipelineStack extends cdk.Stack {
           resources: ['*'],
         }),
       ],
+      env: {
+        VERSION: 'bookworm',
+      //   ANOTHER_VARIABLE: process.env.ANOTHER_VARIABLE || 'default-value',
+      },
 
     }),
   });
