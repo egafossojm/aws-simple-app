@@ -6,6 +6,7 @@ import { TmPipelineAppStage } from './tm-app-stage';
 import * as codecommit from 'aws-cdk-lib/aws-codecommit';
 import * as kms from 'aws-cdk-lib/aws-kms';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
+import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import { ApplyRemovalPolicyAspect, getRemovalPolicy } from './utils/removal-policy-aspect';
 
 interface TmPipelineStackProps extends cdk.StackProps {
@@ -65,11 +66,23 @@ export class TmPipelineStack extends cdk.Stack {
           resources: ['*'],
         }),
       ],
-      env: {
-        VERSION: 'bookworm',
+      // env: {
+      //   VERSION: 'bookworm',
       // //   ANOTHER_VARIABLE: process.env.ANOTHER_VARIABLE || 'default-value',
-      },
-
+      // },
+      buildEnvironment: {
+        // The user of a Docker image asset in the pipeline requires turning on
+        // 'dockerEnabledForSelfMutation'.
+        // buildImage: codebuild.LinuxBuildImage.fromAsset(this, 'Image', {
+        //   directory: './docker-image',
+        // }),
+        environmentVariables: {
+          VERSION: {
+            type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+            value: 'bookworm',
+          },
+        }
+      }
     }),
   });
 
