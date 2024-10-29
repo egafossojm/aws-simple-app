@@ -52,7 +52,7 @@ export class TmPipelineStack extends cdk.Stack {
         'find . -iname cdk.out',
         'ls -al',
         'pwd',
-        'export VERSION=bookworm'
+        //'export VERSION=bookworm'
         //'rm -rf cdk.out/asset.*',
       ],
       primaryOutputDirectory: './cdk.out',
@@ -65,10 +65,10 @@ export class TmPipelineStack extends cdk.Stack {
           resources: ['*'],
         }),
       ],
-      // env: {
-      //   VERSION: 'bookworm',
+      env: {
+        VERSION: 'bookworm',
       // //   ANOTHER_VARIABLE: process.env.ANOTHER_VARIABLE || 'default-value',
-      // },
+      },
 
     }),
   });
