@@ -122,11 +122,11 @@ export class TmEcsStack extends cdk.Stack {
     const tmPatterns = new TmApplicationLoadBalancedFargateService(this, 'servicePattern', patternsProps);
     tmPatterns.loadBalancer.addSecurityGroup(lbSecurityGroup);
 
-    // tmPatterns.targetGroup.configureHealthCheck({
-    //   path: '/',
-    //   port: '8080',
-    //   healthyHttpCodes: '200',
-    // })
+    tmPatterns.targetGroup.configureHealthCheck({
+      path: '/',
+      port: '8080',
+      healthyHttpCodes: '200',
+    })
 
     tmPatterns.taskDefinition.addToExecutionRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
