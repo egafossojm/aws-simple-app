@@ -19,11 +19,6 @@ const pipelineStack = new TmPipelineStack(app, 'TmPipelineStack', {
   appRepoName  : 'aws-simple-app-code',
   infraBranchName : 'main',
   appBranchName : 'main',
-  imageBuildArgs : {
-    VERSION: 'value1',
-    ARG2: 'value2',
-    ARG3: 'value3',
-  }
 });
 
 Aspects.of(app).add(new AwsSolutionsChecks({verbose: true}));

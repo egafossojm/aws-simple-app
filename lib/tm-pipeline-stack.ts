@@ -67,42 +67,6 @@ export class TmPipelineStack extends cdk.Stack {
         }),
       ],
     }),
-    assetPublishingCodeBuildDefaults: {
-      buildEnvironment: {
-        environmentVariables: {
-          ...Object.fromEntries(
-            Object.entries(props.imageBuildArgs || {}).map(([key, value]) => [key, { value }])
-          )
-      }
-    },
-  },
-    codeBuildDefaults: {
-      buildEnvironment: {
-        environmentVariables: {
-          VERSION: {
-            value: 'Directory'
-          },
-        },
-      }
-    },
-    synthCodeBuildDefaults: {
-      buildEnvironment: {
-        environmentVariables: {
-          VERSION: {
-            value: 'Directory'
-          },
-        },
-      }
-    },
-    selfMutationCodeBuildDefaults: {
-      buildEnvironment: {
-        environmentVariables: {
-          VERSION: {
-            value: 'Directory'
-          },
-        },
-      }
-    }
   });
 
   pipeline.addStage(new TmPipelineAppStage(this, 'AppStage', {
