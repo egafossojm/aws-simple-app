@@ -14,9 +14,10 @@ interface TmPipelineStackProps extends cdk.StackProps {
   readonly infraRepoName: string;
   readonly appRepoName: string;
   readonly infraBranchName: string;
-  readonly appBranchName: string;
-  
+  readonly appBranchName: string; 
+  readonly imageBuildArgs?: {};
 }
+
 export class TmPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: TmPipelineStackProps) {
     super(scope, id, props);
@@ -69,12 +70,12 @@ export class TmPipelineStack extends cdk.Stack {
     assetPublishingCodeBuildDefaults: {
       buildEnvironment: {
         environmentVariables: {
-          VERSION: {
-            value: 'Directory'
-          },
-        },
+          ...Object.fromEntries(
+            Object.entries(props.imageBuildArgs || {}).map(([key, value]) => [key, { value }])
+          )
       }
     },
+  },
     codeBuildDefaults: {
       buildEnvironment: {
         environmentVariables: {

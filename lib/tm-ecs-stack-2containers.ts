@@ -9,6 +9,74 @@ import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as ecr_assets from 'aws-cdk-lib/aws-ecr-assets';
 
+interface CustomTmApplicationLoadBalancedFargateServiceProps extends TmApplicationLoadBalancedFargateServiceProps {
+  secondBuildContextPath?: string; // New optional properties for additional image build path
+  secondBuildDockerfile?: string;
+}
+
+class CustomTmApplicationLoadBalancedFargateService extends TmApplicationLoadBalancedFargateService {
+  constructor(scope: Construct, id: string, props: CustomTmApplicationLoadBalancedFargateServiceProps) {
+    // Create the primary Docker image asset
+    const customDockerImageAsset = new ecr_assets.DockerImageAsset(scope, 'CustomApplicationImage', {
+      directory: props.buildContextPath,
+      file: props.buildDockerfile,
+      followSymlinks: cdk.SymlinkFollowMode.ALWAYS,
+      buildArgs: {
+        DIR: 'Directory'
+      },
+    });
+
+    // Optionally create a secondary Docker image asset
+    const secondaryDockerImageAsset = props.secondBuildContextPath && props.secondBuildDockerfile
+      ? new ecr_assets.DockerImageAsset(scope, 'SecondaryApplicationImage', {
+        directory: props.secondBuildContextPath,
+        file: props.secondBuildDockerfile,
+        followSymlinks: cdk.SymlinkFollowMode.ALWAYS,
+        buildArgs:{
+          DIR: 'Directory'
+        }
+      })
+      : undefined;
+
+          // Update task image options to use the custom image
+    const customProps: TmApplicationLoadBalancedFargateServiceProps = {
+      ...props,
+      taskImageOptions: {
+        ...props.taskImageOptions,
+        image: ecs.ContainerImage.fromDockerImageAsset(customDockerImageAsset),
+      },
+    };
+
+    // Pass updated props to the parent class
+    super(scope, id, customProps);
+  
+    // Add secondary container if the image was created
+    if (secondaryDockerImageAsset) {
+      const secondaryContainer = this.taskDefinition.addContainer('SecondaryContainer', {
+        image: ecs.ContainerImage.fromDockerImageAsset(secondaryDockerImageAsset),
+        logging: ecs.LogDriver.awsLogs({ streamPrefix: 'secondaryImage' }),
+      });
+      secondaryContainer.addPortMappings({
+        containerPort: 9000, // Port that nginx listens on
+        protocol: ecs.Protocol.TCP,
+      });
+      props.efsVolumes?.forEach((volume) => {
+        secondaryContainer.addMountPoints({
+          containerPath: volume.path,
+          sourceVolume: volume.name,
+          readOnly: true, // Set to read-only for NGINX
+        });
+      });
+
+      this.taskDefinition.defaultContainer!.addContainerDependencies({
+        container: secondaryContainer,
+        condition: ecs.ContainerDependencyCondition.START, 
+      });
+
+    }
+  }
+}
+
 export interface TmEcsStackProps extends cdk.StackProps {
   readonly vpc: ec2.IVpc;
   readonly allowPublicInternetAccess?: boolean;
@@ -26,6 +94,8 @@ export interface TmEcsStackProps extends cdk.StackProps {
   readonly applicationName: string;
   readonly buildContextPath: string;
   readonly buildDockerfile: string;
+  readonly secondBuildContextPath?: string;
+  readonly secondBuildDockerfile?: string;
   readonly scheduledTaskScheduleExpression?: cdk.aws_events.Schedule;
   readonly scheduledTasksCommand?: string;
   readonly rdsClusterSecurityGroup: ec2.ISecurityGroup;
@@ -94,7 +164,7 @@ export class TmEcsStack extends cdk.Stack {
     // }
 
     /** Service Props*/
-    const patternsProps: TmApplicationLoadBalancedFargateServiceProps = {
+    const patternsProps: CustomTmApplicationLoadBalancedFargateServiceProps = {
       vpc: props.vpc,
       memoryLimitMiB: props.memoryLimitMiB,
       cpu: props.cpu,
@@ -110,6 +180,8 @@ export class TmEcsStack extends cdk.Stack {
       secrets: environment_secrets,
       buildContextPath: props.buildContextPath,
       buildDockerfile: props.buildDockerfile,
+      secondBuildContextPath: props.secondBuildContextPath,
+      secondBuildDockerfile: props.secondBuildDockerfile,
       scheduledTaskScheduleExpression: props.scheduledTaskScheduleExpression,
       //schedule: cdk.aws_events.Schedule.rate(cdk.Duration.minutes(1)),
       scheduledTasksCommand: props.scheduledTasksCommand,
@@ -119,7 +191,7 @@ export class TmEcsStack extends cdk.Stack {
     }
 
     /** Service Pattern */
-    const tmPatterns = new TmApplicationLoadBalancedFargateService(this, 'servicePattern', patternsProps);
+    const tmPatterns = new CustomTmApplicationLoadBalancedFargateService(this, 'servicePattern', patternsProps);
     tmPatterns.loadBalancer.addSecurityGroup(lbSecurityGroup);
 
     // tmPatterns.targetGroup.configureHealthCheck({
