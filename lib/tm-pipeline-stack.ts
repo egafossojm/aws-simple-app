@@ -62,14 +62,20 @@ export class TmPipelineStack extends cdk.Stack {
           actions: [
             'ec2:DescribeAvailabilityZones',
             'ssm:GetParameter',
+          ],
+          resources: ['*'],
+        }),
+        new iam.PolicyStatement({
+          actions: [
             'route53:ChangeResourceRecordSets',
             'route53:ListResourceRecordSets',
             'route53:GetHostedZone',
-            'acm:RequestCertificate',
-            'acm:DescribeCertificate',
-            'acm:ListCertificates'
+            // "acm:RequestCertificate",
+            // "acm:DescribeCertificate",
+            // "acm:ListCertificates"
           ],
-          resources: ['*'],
+          //resources: [`arn:aws:route53:::hostedzone/${hostedZoneId}`],
+          resources: ['arn:aws:route53:::hostedzone/ZQ1QUTU88KUTS'],
         }),
       ],
     }),
