@@ -105,7 +105,7 @@ export class TmEcsStack extends cdk.Stack {
       containerPort: props.containerPort,
       // Force HTTP instead of HTTPS
       //listenerPort: 80,
-      protocol: elbv2.ApplicationProtocol.HTTP,
+      protocol: elbv2.ApplicationProtocol.HTTPS,
       targetProtocol: elbv2.ApplicationProtocol.HTTP,
       secrets: environment_secrets,
       buildContextPath: props.buildContextPath,
