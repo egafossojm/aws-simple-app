@@ -7,7 +7,9 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AwsManagedPrefixList } from './cloudfront/prefixList';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as ecr_assets from 'aws-cdk-lib/aws-ecr-assets';
+import { HostedZone } from 'aws-cdk-lib/aws-route53';
 
 export interface TmEcsStackProps extends cdk.StackProps {
   readonly vpc: ec2.IVpc;
@@ -20,7 +22,6 @@ export interface TmEcsStackProps extends cdk.StackProps {
   readonly containerPort?: number;
   readonly minTaskCount?: number;
   readonly maxTaskCount?: number;
-  readonly customHttpHeaderParameterName: string;
   readonly secretsFromSsmParameterStore?: string[];
   readonly additionalSecretsFromParameterStore?: { [key: string]: string };
   readonly applicationName: string;
@@ -29,6 +30,9 @@ export interface TmEcsStackProps extends cdk.StackProps {
   readonly scheduledTaskScheduleExpression?: cdk.aws_events.Schedule;
   readonly scheduledTasksCommand?: string;
   readonly rdsClusterSecurityGroup: ec2.ISecurityGroup;
+  readonly customHttpHeaderParameterName: string;
+  readonly domainNameParameterName: string;
+  readonly hostedZoneIdParameterName: string;
   // readonly redisClusterSecurityGroup: ec2.ISecurityGroup;
   // readonly solrSecurityGroup: ec2.ISecurityGroup;
 }
@@ -42,7 +46,7 @@ export class TmEcsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: TmEcsStackProps) {
 
     super(scope, id, props);
-    
+
 
     // Get cloudFront prefixlist
     const cloudFrontPrefixListId = new AwsManagedPrefixList(this, 'CloudfrontOriginPrefixList', {
@@ -59,12 +63,9 @@ export class TmEcsStack extends cdk.Stack {
     //lbSecurityGroup.addIngressRule(ec2.Peer.prefixList(cloudFrontPrefixListId), ec2.Port.tcp(443), 'Allow HTTPS from CloudFront');
     lbSecurityGroup.addIngressRule(ec2.Peer.prefixList(cloudFrontPrefixListId), ec2.Port.tcp(80), 'Allow HTTPS from CloudFront');
 
-    // const customHttpHeaderValue = ssm.StringParameter.valueForStringParameter(
-    //   this, 'customHttpHeaderValue');
-    // const domainName = ssm.StringParameter.valueForStringParameter(
-    //   this, 'domainName');
-    // const hostedZoneId = ssm.StringParameter.valueForStringParameter(
-    //   this, 'hostedZoneId');
+    const customHttpHeaderValue = ssm.StringParameter.valueForStringParameter(this, props.customHttpHeaderParameterName);
+    const hostedZoneId = ssm.StringParameter.valueForStringParameter(this, props.hostedZoneIdParameterName);
+    const domainName = ssm.StringParameter.valueForStringParameter(this, props.domainNameParameterName);
 
     // Image config
     const secretsFromSsmParameterStore: string[] = props.secretsFromSsmParameterStore || [];
@@ -103,10 +104,9 @@ export class TmEcsStack extends cdk.Stack {
       maxTaskCount: props.maxTaskCount,
       containerPort: props.containerPort,
       // Force HTTP instead of HTTPS
-      listenerPort: 80,
+      //listenerPort: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
       targetProtocol: elbv2.ApplicationProtocol.HTTP,
-      customHttpHeaderValue: ssm.StringParameter.valueForStringParameter(this, props.customHttpHeaderParameterName),
       secrets: environment_secrets,
       buildContextPath: props.buildContextPath,
       buildDockerfile: props.buildDockerfile,
@@ -116,6 +116,11 @@ export class TmEcsStack extends cdk.Stack {
       efsVolumes: [
         { name: 'assets', path: '/var/www/public/typo3temp/assets' },
       ],
+      customHttpHeaderValue: customHttpHeaderValue,
+      certificate: new acm.Certificate(this, 'Certificate', {
+        domainName: domainName,
+        validation: acm.CertificateValidation.fromDns(HostedZone.fromHostedZoneId(this, 'HostedZone', hostedZoneId)),
+      }),
     }
 
     /** Service Pattern */

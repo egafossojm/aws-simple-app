@@ -5,6 +5,7 @@ import { TmBastionStack } from './tm-bastion-stack';
 import { TmSolrEc2Stack } from './tm-solr-ec2-stack';
 import { TmEcsStack, TmEcsStackProps } from './tm-ecs-stack';
 import { TmRdsAuroraMysqlServerlessStack } from './tm-rds-aurora-mysql-serverless-stack';
+import { TmCloudfrontStack, TmCloudfrontStackProps } from './tm-cloudfront-stack';
 import { TmRedisStack } from './tm-redis-stack';
 import { NagSuppressions, AwsSolutionsChecks } from 'cdk-nag';
 import * as path from 'path';
@@ -34,7 +35,7 @@ export class TmPipelineAppStage extends cdk.Stage {
       range: '10.3.0.0/16',
       //hostedZoneName: 'avatar-site-web.internal',
     });
-    
+
     const bastion = new TmBastionStack(this, `TmBastion${regionName}Stack`, {
       vpc: vpc.vpc,
       env: env,
@@ -47,7 +48,7 @@ export class TmPipelineAppStage extends cdk.Stage {
     //   env: env,
     //   crossRegionReferences: true,
     // });
-    
+
     const rds = new TmRdsAuroraMysqlServerlessStack(this, `TmRdsAurora${regionName}`, {
       env: env,
       vpc: vpc.vpc,
@@ -60,60 +61,61 @@ export class TmPipelineAppStage extends cdk.Stage {
     //   crossRegionReferences: true,
     //   allowFromConstructs: { bastion: bastion.securityGroup },
     // }); 
-    
+
     const ecsStackProps: TmEcsStackProps = {
       env: env,
       vpc: vpc.vpc,
       listenToHttp: true,
       containerPort: 8080,
-      
       crossRegionReferences: true,
       buildContextPath: path.join(__dirname, '../build/'),
       buildDockerfile: 'Dockerfile',
       applicationName: 'avatar',
-      customHttpHeaderParameterName: '/avatar/cloudfrontStack/parameters/customHttpHeader',
       rdsClusterSecurityGroup: rds.securityGroup,
       // redisClusterSecurityGroup: redis.securityGroup,
       // solrSecurityGroup: solr.securityGroup,
       cpu: 512,
       memoryLimitMiB: 1024,
       desiredCount: 1,
+      hostedZoneIdParameterName: '/avatar/cloudfrontStack/parameters/hostedZoneId',
+      customHttpHeaderParameterName: '/avatar/cloudfrontStack/parameters/customHttpHeader',
+      domainNameParameterName: '/avatar/cloudfrontStack/parameters/domanName',
       /*
       hostedZoneIdParameterName: 'hostedZoneId',
       customHttpHeaderParameterName: 'customHttpHeaderValue',
       domainParameterName: 'domainName',
       subjectAlternativeNamesParameterName: 'subjectAlternativeNames',
       */
-     // for secrets like `/applications/${applicationName}/secrets/${secret}`,
-       secretsFromSsmParameterStore: [
-        "WP_DATABASE_HOST",
-        "WP_DATABASE_NAME",
-        "WP_DATABASE_USER_NAME",
-        "WP_DATABASE_USER_PASSWORD",
-      //   "TOU_BASE_DOMAIN",
-      //   "TOU_DOMAINS_LIST",
-      //   "TOU_DATABASE_NAME",
-      //   "TOU_DATABASE_PASSWORD",
-      //   "TOU_DATABASE_USERNAME",
-      //   "TOU_MAIL_DEFAULT_MAIL_FROM_ADDRESS",
-      //   "TOU_MAIL_DEFAULT_MAIL_FROM_NAME",
-      //   "TOU_MAIL_TRANSPORT",
-      //   "TOU_MAIL_TRANSPORT_SENDMAIL_COMMAND",
-      //   "TOU_MAIL_TRANSPORT_SMTP_ENCRYPT",
-      //   "TOU_MAIL_TRANSPORT_SMTP_PASSWORD",
-      //   "TOU_MAIL_TRANSPORT_SMTP_SERVER",
-      //   "TOU_MAIL_TRANSPORT_SMTP_USERNAME",
-      //   "TOU_ENABLE_REDIS_CACHE_CONFIGURATION",
-      //   "TYPO3_CONTEXT",
-      //   "TOU_TYPO3_CONF_VARS_SYS_DISPLAY_ERRORS",
-      //   "TOU_TYPO3_CONV_VARS_SYS_ENCRYPTION_KEY",
-      //   "TOU_TM_S3ASSETS_ACCESS_KEY_ID",
-      //   "TOU_TM_S3ASSETS_SECRET_KEY",
-      //   "TOU_TM_S3ASSETS_REGION",
-      //   "TOU_TM_S3ASSETS_BUCKET_NAME",
-      //   "TOU_TM_S3ASSETS_DOMAIN",
-      //   "TOU_SOLR_SERVER_PORT",
-       ],
+      // for secrets like `/applications/${applicationName}/secrets/${secret}`,
+      secretsFromSsmParameterStore: [
+        // "WP_DATABASE_HOST",
+        // "WP_DATABASE_NAME",
+        // "WP_DATABASE_USER_NAME",
+        // "WP_DATABASE_USER_PASSWORD",
+        //   "TOU_BASE_DOMAIN",
+        //   "TOU_DOMAINS_LIST",
+        //   "TOU_DATABASE_NAME",
+        //   "TOU_DATABASE_PASSWORD",
+        //   "TOU_DATABASE_USERNAME",
+        //   "TOU_MAIL_DEFAULT_MAIL_FROM_ADDRESS",
+        //   "TOU_MAIL_DEFAULT_MAIL_FROM_NAME",
+        //   "TOU_MAIL_TRANSPORT",
+        //   "TOU_MAIL_TRANSPORT_SENDMAIL_COMMAND",
+        //   "TOU_MAIL_TRANSPORT_SMTP_ENCRYPT",
+        //   "TOU_MAIL_TRANSPORT_SMTP_PASSWORD",
+        //   "TOU_MAIL_TRANSPORT_SMTP_SERVER",
+        //   "TOU_MAIL_TRANSPORT_SMTP_USERNAME",
+        //   "TOU_ENABLE_REDIS_CACHE_CONFIGURATION",
+        //   "TYPO3_CONTEXT",
+        //   "TOU_TYPO3_CONF_VARS_SYS_DISPLAY_ERRORS",
+        //   "TOU_TYPO3_CONV_VARS_SYS_ENCRYPTION_KEY",
+        //   "TOU_TM_S3ASSETS_ACCESS_KEY_ID",
+        //   "TOU_TM_S3ASSETS_SECRET_KEY",
+        //   "TOU_TM_S3ASSETS_REGION",
+        //   "TOU_TM_S3ASSETS_BUCKET_NAME",
+        //   "TOU_TM_S3ASSETS_DOMAIN",
+        //   "TOU_SOLR_SERVER_PORT",
+      ],
       // additionalSecretsFromParameterStore: { 
       //   "TOU_DATABASE_WRITER_HOSTNAME": "/RDS/Endpoint/Write",
       //   "TOU_REDIS_HOSTNAME": "/Redis/Endpoint/Primary",
@@ -124,7 +126,32 @@ export class TmPipelineAppStage extends cdk.Stage {
       // },
     }
 
-    new TmEcsStack(this, `TmEcs${regionName}Stack`, ecsStackProps)
+    const ecs = new TmEcsStack(this, `TmEcs${regionName}Stack`, ecsStackProps);
+
+    // CLOUDFRONT
+
+    const cloudfrontEnv = {
+      account: process.env.CDK_DEFAULT_ACCOUNT,
+      region: 'us-east-1',
+    }
+
+    const cloudfrontStackProps: TmCloudfrontStackProps = {
+      env: cloudfrontEnv,
+      crossRegionReferences: true,
+      retainLogBuckets: false,
+      applicationLoadbalancersDnsName: ecs.loadbalancer.loadBalancerDnsName,
+      hostedZoneIdParameterName: '/avatar/cloudfrontStack/parameters/hostedZoneId',
+      customHttpHeaderParameterName: '/avatar/cloudfrontStack/parameters/customHttpHeader',
+      domainNameParameterName: '/avatar/cloudfrontStack/parameters/domanName',
+      basicAuthEnabled: true,
+      basicAuthBase64: '/cloudfrontStack/parameters/basicAuthBase64',
+    }
+
+    new TmCloudfrontStack(this, 'TmCloudfrontUsEast1Stack', cloudfrontStackProps);
+
+
+
+
 
   }
 
