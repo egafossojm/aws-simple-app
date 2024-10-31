@@ -5,7 +5,7 @@ import { TmBastionStack } from './tm-bastion-stack';
 import { TmSolrEc2Stack } from './tm-solr-ec2-stack';
 import { TmEcsStack, TmEcsStackProps } from './tm-ecs-stack';
 import { TmRdsAuroraMysqlServerlessStack } from './tm-rds-aurora-mysql-serverless-stack';
-import { TmCloudfrontStack, TmCloudfrontStackProps } from './tm-cloudfront-stack';
+//import { TmCloudfrontStack, TmCloudfrontStackProps } from './tm-cloudfront-stack';
 import { TmRedisStack } from './tm-redis-stack';
 import { NagSuppressions, AwsSolutionsChecks } from 'cdk-nag';
 import * as path from 'path';
