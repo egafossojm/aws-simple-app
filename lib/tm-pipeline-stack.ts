@@ -65,18 +65,18 @@ export class TmPipelineStack extends cdk.Stack {
           ],
           resources: ['*'],
         }),
-        new iam.PolicyStatement({
-          actions: [
-            'route53:ChangeResourceRecordSets',
-            'route53:ListResourceRecordSets',
-            'route53:GetHostedZone',
-            // "acm:RequestCertificate",
-            // "acm:DescribeCertificate",
-            // "acm:ListCertificates"
-          ],
-          //resources: [`arn:aws:route53:::hostedzone/${hostedZoneId}`],
-          resources: ['arn:aws:route53:::hostedzone/ZQ1QUTU88KUTS'],
-        }),
+        // new iam.PolicyStatement({
+        //   actions: [
+        //     'route53:ChangeResourceRecordSets',
+        //     'route53:ListResourceRecordSets',
+        //     'route53:GetHostedZone',
+        //     // "acm:RequestCertificate",
+        //     // "acm:DescribeCertificate",
+        //     // "acm:ListCertificates"
+        //   ],
+        //   //resources: [`arn:aws:route53:::hostedzone/${hostedZoneId}`],
+        //   resources: ['arn:aws:route53:::hostedzone/ZQ1QUTU88KUTS'],
+        // }),
       ],
     }),
   });
