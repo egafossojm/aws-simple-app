@@ -60,8 +60,8 @@ export class TmEcsStack extends cdk.Stack {
       description: 'ALB Security Group',
     });
 
-    //lbSecurityGroup.addIngressRule(ec2.Peer.prefixList(cloudFrontPrefixListId), ec2.Port.tcp(443), 'Allow HTTPS from CloudFront');
-    lbSecurityGroup.addIngressRule(ec2.Peer.prefixList(cloudFrontPrefixListId), ec2.Port.tcp(80), 'Allow HTTPS from CloudFront');
+    lbSecurityGroup.addIngressRule(ec2.Peer.prefixList(cloudFrontPrefixListId), ec2.Port.tcp(443), 'Allow HTTPS from CloudFront');
+    //lbSecurityGroup.addIngressRule(ec2.Peer.prefixList(cloudFrontPrefixListId), ec2.Port.tcp(80), 'Allow HTTPS from CloudFront');
 
     const customHttpHeaderValue = ssm.StringParameter.valueForStringParameter(this, props.customHttpHeaderParameterName);
     const hostedZoneId = ssm.StringParameter.valueForStringParameter(this, props.hostedZoneIdParameterName);
@@ -105,8 +105,10 @@ export class TmEcsStack extends cdk.Stack {
       containerPort: props.containerPort,
       // Force HTTP instead of HTTPS
       //listenerPort: 80,
-      protocol: elbv2.ApplicationProtocol.HTTPS,
-      targetProtocol: elbv2.ApplicationProtocol.HTTP,
+      // protocol: elbv2.ApplicationProtocol.HTTPS,
+      // targetProtocol: elbv2.ApplicationProtocol.HTTP,
+      domainName: domainName,
+      domainZone: HostedZone.fromHostedZoneId(this, 'HostedZone', hostedZoneId),
       secrets: environment_secrets,
       buildContextPath: props.buildContextPath,
       buildDockerfile: props.buildDockerfile,
@@ -117,10 +119,12 @@ export class TmEcsStack extends cdk.Stack {
         { name: 'assets', path: '/var/www/public/typo3temp/assets' },
       ],
       customHttpHeaderValue: customHttpHeaderValue,
-      certificate: new acm.Certificate(this, 'Certificate', {
-        domainName: domainName,
-        validation: acm.CertificateValidation.fromDns(HostedZone.fromHostedZoneId(this, 'HostedZone', hostedZoneId)),
-      }),
+      
+      // certificate: new acm.Certificate(this, 'Certificate', {
+      //   domainName: domainName,
+      //   validation: acm.CertificateValidation.fromDns(HostedZone.fromHostedZoneId(this, 'HostedZone', hostedZoneId)),
+      // }),
+
     }
 
     /** Service Pattern */
