@@ -130,24 +130,24 @@ export class TmPipelineAppStage extends cdk.Stage {
 
     // CLOUDFRONT
 
-    const cloudfrontEnv = {
-      account: process.env.CDK_DEFAULT_ACCOUNT,
-      region: 'us-east-1',
-    }
+    // const cloudfrontEnv = {
+    //   account: process.env.CDK_DEFAULT_ACCOUNT,
+    //   region: 'us-east-1',
+    // }
 
-    const cloudfrontStackProps: TmCloudfrontStackProps = {
-      env: cloudfrontEnv,
-      crossRegionReferences: true,
-      retainLogBuckets: false,
-      applicationLoadbalancersDnsName: ecs.loadbalancer.loadBalancerDnsName,
-      hostedZoneIdParameterName: '/avatar/cloudfrontStack/parameters/hostedZoneId',
-      customHttpHeaderParameterName: '/avatar/cloudfrontStack/parameters/customHttpHeader',
-      domainNameParameterName: '/avatar/cloudfrontStack/parameters/domanName',
-      basicAuthEnabled: true,
-      basicAuthBase64: '/cloudfrontStack/parameters/basicAuthBase64',
-    }
+    // const cloudfrontStackProps: TmCloudfrontStackProps = {
+    //   env: cloudfrontEnv,
+    //   crossRegionReferences: true,
+    //   retainLogBuckets: false,
+    //   applicationLoadbalancersDnsName: ecs.loadbalancer.loadBalancerDnsName,
+    //   hostedZoneIdParameterName: '/avatar/cloudfrontStack/parameters/hostedZoneId',
+    //   customHttpHeaderParameterName: '/avatar/cloudfrontStack/parameters/customHttpHeader',
+    //   domainNameParameterName: '/avatar/cloudfrontStack/parameters/domanName',
+    //   basicAuthEnabled: true,
+    //   basicAuthBase64: '/cloudfrontStack/parameters/basicAuthBase64',
+    // }
 
-    new TmCloudfrontStack(this, 'TmCloudfrontUsEast1Stack', cloudfrontStackProps);
+    // new TmCloudfrontStack(this, 'TmCloudfrontUsEast1Stack', cloudfrontStackProps);
 
 
 
