@@ -62,6 +62,12 @@ export class TmPipelineStack extends cdk.Stack {
           actions: [
             'ec2:DescribeAvailabilityZones',
             'ssm:GetParameter',
+            'route53:ChangeResourceRecordSets',
+            'route53:ListResourceRecordSets',
+            'route53:GetHostedZone',
+            'acm:RequestCertificate',
+            'acm:DescribeCertificate',
+            'acm:ListCertificates'
           ],
           resources: ['*'],
         }),
