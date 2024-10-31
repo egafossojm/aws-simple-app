@@ -107,8 +107,8 @@ export class TmEcsStack extends cdk.Stack {
       //listenerPort: 80,
       // protocol: elbv2.ApplicationProtocol.HTTPS,
       // targetProtocol: elbv2.ApplicationProtocol.HTTP,
-      domainName: domainName,
-      domainZone: HostedZone.fromHostedZoneId(this, 'HostedZone', hostedZoneId),
+      // domainName: domainName,
+      // domainZone: HostedZone.fromHostedZoneId(this, 'HostedZone', hostedZoneId),
       secrets: environment_secrets,
       buildContextPath: props.buildContextPath,
       buildDockerfile: props.buildDockerfile,
@@ -119,11 +119,10 @@ export class TmEcsStack extends cdk.Stack {
         { name: 'assets', path: '/var/www/public/typo3temp/assets' },
       ],
       customHttpHeaderValue: customHttpHeaderValue,
-      
-      // certificate: new acm.Certificate(this, 'Certificate', {
-      //   domainName: domainName,
-      //   validation: acm.CertificateValidation.fromDns(HostedZone.fromHostedZoneId(this, 'HostedZone', hostedZoneId)),
-      // }),
+      certificate: new acm.Certificate(this, 'Certificate', {
+        domainName: domainName,
+        validation: acm.CertificateValidation.fromDns(HostedZone.fromHostedZoneId(this, 'HostedZone', hostedZoneId)),
+      }),
 
     }
 
