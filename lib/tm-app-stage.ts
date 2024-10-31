@@ -32,7 +32,7 @@ export class TmPipelineAppStage extends cdk.Stage {
     const vpc = new TmVpcBaseStack(this, `TmVpc${regionName}Stack`, {
       env: env,
       range: '10.3.0.0/16',
-      hostedZoneName: 'avatar-site-web.internal',
+      //hostedZoneName: 'avatar-site-web.internal',
     });
     
     const bastion = new TmBastionStack(this, `TmBastion${regionName}Stack`, {
