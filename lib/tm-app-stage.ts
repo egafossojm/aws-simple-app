@@ -7,8 +7,10 @@ import { TmEcsStack, TmEcsStackProps } from './tm-ecs-stack';
 import { TmRdsAuroraMysqlServerlessStack } from './tm-rds-aurora-mysql-serverless-stack';
 //import { TmCloudfrontStack, TmCloudfrontStackProps } from './tm-cloudfront-stack';
 import { TmRedisStack } from './tm-redis-stack';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import { NagSuppressions, AwsSolutionsChecks } from 'cdk-nag';
 import * as path from 'path';
+import { TmCloudfrontStack, TmCloudfrontStackProps } from './tm-cloudfront-stack';
 
 export class TmPipelineAppStage extends cdk.Stage {
 
@@ -130,24 +132,25 @@ export class TmPipelineAppStage extends cdk.Stage {
 
     // CLOUDFRONT
 
-    // const cloudfrontEnv = {
-    //   account: process.env.CDK_DEFAULT_ACCOUNT,
-    //   region: 'us-east-1',
-    // }
+    const cloudfrontEnv = {
+      account: process.env.CDK_DEFAULT_ACCOUNT,
+      region: 'us-east-1',
+    }
 
-    // const cloudfrontStackProps: TmCloudfrontStackProps = {
-    //   env: cloudfrontEnv,
-    //   crossRegionReferences: true,
-    //   retainLogBuckets: false,
-    //   applicationLoadbalancersDnsName: ecs.loadbalancer.loadBalancerDnsName,
-    //   hostedZoneIdParameterName: '/avatar/cloudfrontStack/parameters/hostedZoneId',
-    //   customHttpHeaderParameterName: '/avatar/cloudfrontStack/parameters/customHttpHeader',
-    //   domainNameParameterName: '/avatar/cloudfrontStack/parameters/domanName',
-    //   basicAuthEnabled: true,
-    //   basicAuthBase64: '/cloudfrontStack/parameters/basicAuthBase64',
-    // }
+    const cloudfrontStackProps: TmCloudfrontStackProps = {
+      env: cloudfrontEnv,
+      crossRegionReferences: true,
+      retainLogBuckets: false,
+      loadBalancerOriginProtocol: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+      applicationLoadbalancersDnsName: ecs.loadbalancer.loadBalancerDnsName,
+      hostedZoneIdParameterName: '/avatar/cloudfrontStack/parameters/hostedZoneId',
+      customHttpHeaderParameterName: '/avatar/cloudfrontStack/parameters/customHttpHeader',
+      domainNameParameterName: '/avatar/cloudfrontStack/parameters/domanName',
+      basicAuthEnabled: false,
+      // basicAuthBase64: '/cloudfrontStack/parameters/basicAuthBase64',
+    }
 
-    // new TmCloudfrontStack(this, 'TmCloudfrontUsEast1Stack', cloudfrontStackProps);
+    new TmCloudfrontStack(this, 'TmCloudfrontUsEast1Stack', cloudfrontStackProps);
 
 
 
